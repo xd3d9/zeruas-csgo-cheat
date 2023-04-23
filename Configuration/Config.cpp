@@ -513,6 +513,7 @@ void c_config::load_defaults() {
 	
 	setcolor(c["oofcoll"], 253, 253, 253, 255);
 	setcolor(c["playercoll"], 158, 203, 74, 255);
+	setcolor(c["hitchams_c"], 255, 255, 255, 255);
 	setcolor(c["adjcol"], 61, 57, 62, 255);
 	setcolor(c["bullcoll"], 175, 101, 188, 255);
 	setcolor(c["xqzcoll"], 74, 130, 185, 255);

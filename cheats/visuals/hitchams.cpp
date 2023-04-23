@@ -52,9 +52,10 @@ void hit_chams::add_matrix(player_t* player, matrix3x4_t* bones)
 
 void hit_chams::draw_hit_matrix()
 {
-    if (!g_ctx.available())
+    
+    if (!c_config::get()->b["hitchams"])
         m_Hitmatrix.clear();
-
+        
     if (m_Hitmatrix.empty())
         return;
 
@@ -86,12 +87,12 @@ void hit_chams::draw_hit_matrix()
 
         auto material = m_materialsystem()->FindMaterial(crypt_str("dev/glow_armsrace.vmt"), nullptr);
 
-        auto alpha_c = (float)255 / 255.0f;
+        auto alpha_c = (float)c_config::get()->c["hitchams_c"][3] / 255.0f;
         float normal_color[3] =
         {
-            255 / 255.0f,
-            255 / 255.0f,
-            255 / 255.0f
+            c_config::get()->c["hitchams_c"][0] / 255.0f,
+            c_config::get()->c["hitchams_c"][1] / 255.0f,
+            c_config::get()->c["hitchams_c"][2] / 255.0f
         };
 
         m_renderview()->SetBlend(alpha_c * alpha);
@@ -106,13 +107,13 @@ void hit_chams::draw_hit_matrix()
 
 		///////////////////////////////////////////////////////////////////////////////////
 
-		auto asd_alpha = (float)255 / 255.0f;
+		auto asd_alpha = (float)c_config::get()->c["hitchams_c"][3] / 255.0f;
 
 		float xqz_color[3] =
 		{
-			255 / 255.0f,
-			255 / 255.0f,
-			255 / 255.0f
+            c_config::get()->c["hitchams_c"][0] / 255.0f,
+            c_config::get()->c["hitchams_c"][1] / 255.0f,
+            c_config::get()->c["hitchams_c"][2] / 255.0f
 		};
 
 		m_renderview()->SetBlend(asd_alpha * alpha_c);

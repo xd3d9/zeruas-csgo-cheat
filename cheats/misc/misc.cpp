@@ -447,12 +447,13 @@ void misc::NightmodeFix()
 
 void misc::aimbot_hitboxes()
 {
+	/*
     if (!g_cfg.player.enable)
         return;
 
     if (!g_cfg.player.lag_hitbox)
         return;
-
+	*/
     auto player = (player_t*)m_entitylist()->GetClientEntity(aim::get().last_target_index);
 
     if (!player)

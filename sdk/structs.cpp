@@ -917,10 +917,10 @@ CStudioHdr* player_t::m_pStudioHdr()
 	//0x2950
 	//fixed
 
-	return *(CStudioHdr**)((uintptr_t)this + *(uintptr_t*)0x2950);
+	//return *(CStudioHdr**)((uintptr_t)this + *(uintptr_t*)0x2950);
 
-	//static auto studio_hdr = util::FindSignature(crypt_str("client.dll"), crypt_str("8B B7 ?? ?? ?? ?? 89 74 24 20"));
-	//return *(CStudioHdr**)((uintptr_t)this + *(uintptr_t*)(studio_hdr + 0x2) + 0x4);
+	static auto studio_hdr = util::FindSignature(crypt_str("client.dll"), crypt_str("8B B7 ?? ?? ?? ?? 89 74 24 20"));
+	return *(CStudioHdr**)((uintptr_t)this + *(uintptr_t*)(studio_hdr + 0x2) + 0x4);
 }
 
 bool player_t::setup_bones_fixed(matrix3x4_t* matrix, int mask)

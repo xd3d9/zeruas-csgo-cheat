@@ -769,3 +769,192 @@ void __stdcall hooks::hooked_dme(IMatRenderContext* ctx, const DrawModelState_t&
 		return original_fn(m_modelrender(), ctx, state, info, bone_to_world);
 	}*/
 }
+/*
+void hit_chams::draw_hit_matrix()
+{
+
+	if (!g_ctx.available())
+		m_Hitmatrix.clear();
+
+	if (m_Hitmatrix.empty())
+		return;
+
+	if (!m_modelrender())
+		return;
+
+	auto ctx = m_materialsystem()->GetRenderContext();
+
+	if (!ctx)
+		return;
+
+	auto it = m_Hitmatrix.begin();
+	while (it != m_Hitmatrix.end()) {
+		if (!it->state.m_pModelToWorld || !it->state.m_pRenderable || !it->state.m_pStudioHdr || !it->state.m_pStudioHWData ||
+			!it->info.pRenderable || !it->info.pModelToWorld || !it->info.pModel) {
+			++it;
+			continue;
+		}
+
+		auto alpha = 1.0f;
+		auto delta = m_globals()->m_realtime - it->time;
+		if (delta > 0.0f) {
+			alpha -= delta;
+			if (delta > 1.0f) {
+				it = m_Hitmatrix.erase(it);
+				continue;
+			}
+		}
+
+		static IMaterial* materials[] =
+		{
+			CreateMaterial(true, crypt_str(R"#("VertexLitGeneric"
+			{
+				"$basetexture"				"vgui/white"
+				"$ignorez"					"0"
+				"$envmap"					" "
+				"$nofog"					"1"
+				"$model"					"1"
+				"$nocull"					"0"
+				"$selfillum"				"1"
+				"$halflambert"				"1"
+				"$znearer"					"0"
+				"$flat"						"0"
+				"$wireframe"				"0"
+			}
+		)#")),
+		CreateMaterial(true, crypt_str(R"#("VertexLitGeneric"
+			{
+				"$basetexture" "vgui/white_additive"
+				"$ignorez" "0"
+				"$envmap" "env_cubemap"
+				"$normalmapalphaenvmapmask" "1"
+				"$envmapcontrast"  "1"
+				"$nofog" "1"
+				"$model" "1"
+				"$nocull" "0"
+				"$selfillum" "1"
+				"$halflambert" "1"
+				"$znearer" "0"
+				"$flat" "1"
+			}
+		)#")),
+		CreateMaterial(false, crypt_str(R"#("UnlitGeneric"
+			{
+				"$basetexture"				"vgui/white"
+				"$ignorez"					"0"
+				"$envmap"					" "
+				"$nofog"					"1"
+				"$model"					"1"
+				"$nocull"					"0"
+				"$selfillum"				"1"
+				"$halflambert"				"1"
+				"$znearer"					"0"
+				"$flat"						"1"
+				"$wireframe"				"0"
+			}
+		)#")),
+		m_materialsystem()->FindMaterial(crypt_str("models/inventory_items/dogtags/dogtags_outline"), "Model texture"),
+		m_materialsystem()->FindMaterial(crypt_str("models/inventory_items/trophy_majors/crystal_clear"), nullptr),
+		m_materialsystem()->FindMaterial(crypt_str("models/inventory_items/cologne_prediction/cologne_prediction_glass"), nullptr),
+		m_materialsystem()->FindMaterial(crypt_str("dev/glow_armsrace.vmt"), nullptr),
+		CreateMaterial(true, crypt_str(R"#("VertexLitGeneric" 
+			{ 
+				"$additive"					"1" 
+				"$envmap"					"models/effects/cube_white" 
+				"$envmaptint"				"[1 1 1]" 
+				"$envmapfresnel"			"1" 
+				"$envmapfresnelminmaxexp" 	"[0 1 2]" 
+				"$alpha" 					"0.7" 
+			}
+		)#")),
+		CreateMaterial(true, crypt_str(R"#("VertexLitGeneric"
+		    {
+		        "$basetexture"				"dev/zone_warning"
+		        "$additive"					"1"
+		        "$envmap"					"editor/cube_vertigo"
+		        "$envmaptint"				"[0 0.5 0.55]"
+		        "$envmapfresnel"			"1"
+		        "$envmapfresnelminmaxexp"   "[0.00005 0.6 6]"
+		        "$alpha"					"0"
+   
+		        Proxies
+		        {
+		            TextureScroll
+		            {
+		                "texturescrollvar"			"$baseTextureTransform"
+		                "texturescrollrate"			"0.25"
+		                "texturescrollangle"		"270"
+		            }
+		            Sine
+		            {
+		                "sineperiod"				"2"
+		                "sinemin"					"0.1"
+		                "resultVar"					"$envmapfresnelminmaxexp[1]"
+		            }
+		        }
+		    }
+		)#")),
+		m_materialsystem()->FindMaterial(crypt_str("models/inventory_items/trophy_majors/velvet"), nullptr),
+		CreateMaterial(true, crypt_str(R"#("VertexLitGeneric"
+		    {
+				 "$basetexture" "dev/dev_camo"
+				 "$envmap" "dev/dev_camoenvmap"
+
+				 "Proxies"
+				 {
+          				 "Camo"
+            		     {
+				 "camopatterntexture" "hl2/materials/dev/dev_camo.tga"
+               	 "camoboundingboxmin" "[ 0.00 0.00 0.00 ]"
+               	 "camoboundingboxmax" "[ 1.00 1.00 1.00 ]"
+              	 "surfaceprop" "concrete"
+				 }
+			 }
+		}
+	)#"))
+		};
+
+		auto material = materials[0];
+
+		auto alpha_c = (float)255 / 255.0f;
+		float normal_color[3] =
+		{
+			255 / 255.0f,
+			255 / 255.0f,
+			255 / 255.0f
+		};
+
+		m_renderview()->SetBlend(alpha_c * alpha);
+		util::color_modulate(normal_color, material);
+
+		material->IncrementReferenceCount();
+		material->SetMaterialVarFlag(MATERIAL_VAR_IGNOREZ, false);
+
+		m_modelrender()->ForcedMaterialOverride(material);
+		m_modelrender()->DrawModelExecute(ctx, it->state, it->info, it->pBoneToWorld);
+		m_modelrender()->ForcedMaterialOverride(nullptr);
+
+		///////////////////////////////////////////////////////////////////////////////////
+
+		auto asd_alpha = (float)255 / 255.0f;
+
+		float xqz_color[3] =
+		{
+			255 / 255.0f,
+			255 / 255.0f,
+			255 / 255.0f
+		};
+
+		m_renderview()->SetBlend(asd_alpha * alpha_c);
+		util::color_modulate(xqz_color, material);
+
+		material->IncrementReferenceCount();
+		material->SetMaterialVarFlag(MATERIAL_VAR_IGNOREZ, true);
+
+		m_modelrender()->ForcedMaterialOverride(material);
+		m_modelrender()->DrawModelExecute(ctx, it->state, it->info, it->pBoneToWorld);
+		m_modelrender()->ForcedMaterialOverride(nullptr);
+
+		++it;
+	}
+}*/

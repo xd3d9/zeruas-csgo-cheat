@@ -519,6 +519,8 @@ void CMenu::Draw() {
 			ui::Keybind("shareesp", &cfg->i["shareeeesp_key"], &cfg->i["sharedesp_key_style"]);
 			ui::Checkbox("Upgrade tablet", &cfg->b["tablet"]);
 			ui::Checkbox("Danger Zone items", &cfg->b["dangerzone"]);
+			ui::Checkbox("Hitchams", &cfg->b["hitchams"]);
+			ui::ColorPicker("Hitchams Color", cfg->c["hitchams_c"], Flags_ColorPicker);
 			draw_lua_items("visuals", "other esp");
 		ui::EndChild();
 
