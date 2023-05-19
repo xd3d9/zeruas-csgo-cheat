@@ -18,7 +18,7 @@ void Discord::Update()
     DiscordRichPresence discord;
     memset(&discord, 0, sizeof(discord));
     discord.details = "Tapping with ZeruaS";
-    discord.state = "v1.4.5";
+    discord.state = "v1.4.6";
     discord.largeImageKey = "icon";
     discord.startTimestamp = time(0);
     Discord_UpdatePresence(&discord);
