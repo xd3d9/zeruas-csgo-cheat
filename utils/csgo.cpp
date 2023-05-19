@@ -1,7 +1,6 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "csgo.hpp"
 #include "..\includes.hpp"
 
 C_CSGO g_csgo;
@@ -42,6 +41,7 @@ C_CSGO g_csgo;
 #undef m_soundservices
 #undef m_basefilesys
 #undef m_weaponsys 
+#undef m_networkStringTableContainer
 
 template<typename T>
 static T* get_interface(const char* mod_name, const char* interface_name, bool exact = false) {
@@ -329,6 +329,13 @@ ILocalize* C_CSGO::m_localize()
 		p_localize = get_interface< ILocalize >(crypt_str("localize.dll"), crypt_str("Localize_"));
 
 	return p_localize;
+}
+
+NetworkStringTableContainer* C_CSGO::m_networkStringTableContainer() {
+	if (!p_networkStringTableContainer)
+		p_networkStringTableContainer = get_interface< NetworkStringTableContainer >(crypt_str("engine.dll"), crypt_str("VEngineClientStringTable"));
+
+	return p_networkStringTableContainer;
 }
 
 DWORD C_CSGO::m_postprocessing() {

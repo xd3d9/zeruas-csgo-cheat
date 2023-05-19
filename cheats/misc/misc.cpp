@@ -10,6 +10,7 @@
 #include "..\visuals\hitchams.h"
 #include "../menu_alpha.h"
 #include "../Configuration/Config.h"
+#include <IfaceMngr.hpp>
 
 #define ALPHA (ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaBar| ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float)
 #define NOALPHA (ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float)
@@ -84,43 +85,127 @@ void misc::AutoCrouch(CUserCmd* cmd)
 	g_ctx.globals.fakeducking = true;
 }
 
+std::string GetTimeStringx()
+{
+	time_t current_time;
+	struct tm* time_info;
+	static char timeString[10];
+	time(&current_time);
+	time_info = localtime(&current_time);
+	strftime(timeString, sizeof(timeString), "%X", time_info);
+	return timeString;
+}
+int getfpsx()
+{
+	IBaseClientDLL* g_CHLClient = Iface::IfaceMngr::getIface<IBaseClientDLL>("client.dll", "VClient0");
+	CGlobalVarsBase* g_GlobalVars = **(CGlobalVarsBase***)((*(DWORD**)(g_CHLClient))[0] + 0x1F);
+	return static_cast<int>(1.f / g_GlobalVars->m_frametime);
+}
+
 void misc::watermark()
 {
-	if (!c_config::get()->b["misc_watermark"])
-		return;
+	int alpha;
+	int centerW, centerH;
+	int monstw, monsth;
+	int w, h;
+	m_engine()->GetScreenSize(w, h);
+	centerW = w / 2;
+	centerH = h / 2;
+	monstw = w;
+	monsth = h;
+	alpha = 255;
 
-	auto game = crypt_str("zeru           | ");
-	auto sense = crypt_str("      as");
+	Color wmline = Color(238, 75, 181, 255);
 
-	int fps = floor(1 / m_globals()->m_frametime);
-	auto text = game + g_ctx.username + crypt_str(" | ") + std::to_string(fps) + crypt_str("fps | ") + g_ctx.globals.time;
+	/// PING MEASURE
+	INetChannelInfo* ncis = m_engine()->GetNetChannelInfo();
+	std::string incoming = g_ctx.local() ? std::to_string((int)(ncis->GetLatency(FLOW_INCOMING) * 1000)) : "0";
+	std::string outgoing = g_ctx.local() ? std::to_string((int)(ncis->GetLatency(FLOW_OUTGOING) * 1000)) : "0";
 
-	auto w = render::get().text_width(fonts[NAME], text.c_str()) + 8;
-	auto h = 18;
+	/// RECT ///
+	/*g_VGuiSurface->DrawSetColor(Color(0, 0, 0));
+	g_VGuiSurface->DrawFilledRect((centerW * 2) - 310, 9, (centerW * 2) - 310 + 158, 9 + 99);
+	g_VGuiSurface->DrawSetColor(Color(60, 60, 60));
+	g_VGuiSurface->DrawFilledRect((centerW * 2) - 309, 10, (centerW * 2) - 309 + 156, 10 + 97);
+	g_VGuiSurface->DrawSetColor(Color(38, 38, 38));
+	g_VGuiSurface->DrawFilledRect((centerW * 2) - 308, 11, (centerW * 2) - 308 + 154, 11 + 95);
+	g_VGuiSurface->DrawSetColor(Color(60, 60, 60));
+	g_VGuiSurface->DrawFilledRect((centerW * 2) - 305, 14, (centerW * 2) - 305 + 148, 14 + 89);
+	g_VGuiSurface->DrawSetColor(Color(28, 28, 28));
+	g_VGuiSurface->DrawFilledRect((centerW * 2) - 304, 15, (centerW * 2) - 304 + 146, 15 + 87);
+*/
+/*
+long curTime;
+curTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-	int width, height;
-	m_engine()->GetScreenSize(width, height);
+float hue = curTime / 100;
 
-	auto x = width - 2;
-	auto y = 12;
-	x = x - w - 10;
+xuifloatcolor temp = xuicolor::HSV(hue / 360.f, 1, 1);
+Color color = Color(temp.x, temp.y, temp.z);
+*/
 
-	render::get().rect_filled(x - 6, y - 6, w + 13, h + 14, Color(0, 0, 0, 255));
-	render::get().rect_filled(x - 5, y - 5, w + 11, h + 12, Color(34, 34, 34, 255));
-	render::get().rect_filled(x + 1, y, w, h + 1, Color(0, 0, 0, 255));
+	m_surface()->DrawSetColor(Color(0, 0, 0));
+	m_surface()->DrawFilledRect((centerW * 2) - 200, centerH + 1, (centerW * 2) - 200 + 192, (centerH + 1) + 139);
+	m_surface()->DrawSetColor(Color(60, 60, 60));
+	m_surface()->DrawFilledRect((centerW * 2) - 199, centerH + 2, (centerW * 2) - 199 + 190, (centerH + 2) + 137);
+	m_surface()->DrawSetColor(Color(38, 38, 38));
+	m_surface()->DrawFilledRect((centerW * 2) - 198, centerH + 3, (centerW * 2) - 198 + 188, (centerH + 3) + 135);
+	m_surface()->DrawSetColor(Color(60, 60, 60));
+	m_surface()->DrawFilledRect((centerW * 2) - 195, centerH + 6, (centerW * 2) - 195 + 182, (centerH + 6) + 129);
+	m_surface()->DrawSetColor(Color(28, 28, 28));
+	m_surface()->DrawFilledRect((centerW * 2) - 194, centerH + 7, (centerW * 2) - 194 + 180, (centerH + 7) + 127);
 
-	render::get().rect(x - 1, y - 1, w + 3, h + 3, Color(56, 56, 56, 255));
-	render::get().rect(x - 5, y - 5, w + 11, h + 12, Color(56, 56, 56, 255));
+	m_surface()->DrawSetColor(Color(wmline));
+	m_surface()->DrawFilledRect((centerW * 2) - 192, centerH + 22, (centerW * 2) - 193 + 178, (centerH + 8) + 15);
+	render::get().text(fonts[NAME], (centerW * 2) - 120, centerH + 8, Color(255, 255, 255, 255), HFONT_CENTERED_NONE, ("ZeruaS"));
 
-	render::get().gradient(x + 2, y + 1, (w / 2) - 1, 1, Color(59, 175, 222, 255), Color(202, 70, 205, 255), GRADIENT_HORIZONTAL);
-	render::get().gradient(x + 1 + (w / 2), y + 1, (w / 2) - 1, 1, Color(202, 70, 205, 255), Color(201, 227, 58, 255), GRADIENT_HORIZONTAL);
-	render::get().gradient(x + 2, y + 2, (w / 2) - 1, 1, Color(59, 175, 222, 130), Color(202, 70, 205, 130), GRADIENT_HORIZONTAL);
-	render::get().gradient(x + 1 + (w / 2), y + 2, (w / 2) - 1, 1, Color(202, 70, 205, 130), Color(201, 227, 58, 130), GRADIENT_HORIZONTAL);
+	/// LINE ON TOP OF WATERMARK ///
+	/*
+	m_surface()->DrawSetColor(Color(238, 75, 181));
+	m_surface()->DrawFilledRect((centerW * 2) - 303, 16, (centerW * 2) - 303 + 144, 16 + 1);
+	*/
+	// GRADIENT COLORS: LEFT(30, 87, 153)  MIDDLE(243, 0, 255)  RIGHT(224, 255, 0)
 
-	render::get().text(fonts[ESP], x + 4, y + 12, Color(0, 0, 0, 180), HFONT_CENTERED_Y, text.c_str());
-	render::get().text(fonts[ESP], x + 4, y + 11, Color(255, 255, 255, 255), HFONT_CENTERED_Y, text.c_str());
-	render::get().text(fonts[ESP], x + 13, y + 12, Color(0, 0, 0, 180), HFONT_CENTERED_Y, sense);
-	render::get().text(fonts[ESP], x + 13, y + 11, Color(160, 200, 80, 255), HFONT_CENTERED_Y, sense);
+
+	/// TEXT ///
+	render::get().text(fonts[NAME], (centerW * 2) - 180, centerH + 37, Color(240, 240, 240, 255), HFONT_CENTERED_NONE, ("Current Time: %s"), GetTimeStringx().c_str());
+
+	if (getfpsx() < 50)
+	{
+		render::get().text(fonts[NAME], (centerW * 2) - 180, centerH + 53, Color(255, 0, 0, 255), HFONT_CENTERED_NONE, ("Fps: %d"), getfpsx());
+	}
+	else
+	{
+		render::get().text(fonts[NAME], (centerW * 2) - 180, centerH + 53, Color(240, 240, 240, 255), HFONT_CENTERED_NONE, ("Fps: %d"), getfpsx());
+	}
+	// bing
+	render::get().text(fonts[NAME], (centerW * 2) - 180, centerH + 69, Color(240, 240, 240, 255), HFONT_CENTERED_NONE, ("Download: %s ms"), incoming.c_str());
+	render::get().text(fonts[NAME], (centerW * 2) - 180, centerH + 85, Color(240, 240, 240, 255), HFONT_CENTERED_NONE, ("Upload: %s ms"), outgoing.c_str());
+
+
+	render::get().text(fonts[NAME], (centerW * 2) - 180, centerH + 117, Color(240, 240, 240, 255), HFONT_CENTERED_NONE, ("Expect The Unexpected"));
+
+
+	/// SPECTATOR LIST ///
+
+	/*  temporarily disabled.
+	if (g_Options.misc_spectatorlist)
+	{
+		g_VGuiSurface->DrawSetColor(Color(0, 0, 0));
+		g_VGuiSurface->DrawFilledRect((centerW * 2) - 200, centerH + 1, (centerW * 2) - 200 + 192, (centerH + 1) + 139);
+		g_VGuiSurface->DrawSetColor(Color(60, 60, 60));
+		g_VGuiSurface->DrawFilledRect((centerW * 2) - 199, centerH + 2, (centerW * 2) - 199 + 190, (centerH + 2) + 137);
+		g_VGuiSurface->DrawSetColor(Color(38, 38, 38));
+		g_VGuiSurface->DrawFilledRect((centerW * 2) - 198, centerH + 3, (centerW * 2) - 198 + 188, (centerH + 3) + 135);
+		g_VGuiSurface->DrawSetColor(Color(60, 60, 60));
+		g_VGuiSurface->DrawFilledRect((centerW * 2) - 195, centerH + 6, (centerW * 2) - 195 + 182, (centerH + 6) + 129);
+		g_VGuiSurface->DrawSetColor(Color(28, 28, 28));
+		g_VGuiSurface->DrawFilledRect((centerW * 2) - 194, centerH + 7, (centerW * 2) - 194 + 180, (centerH + 7) + 127);
+		g_VGuiSurface->DrawSetColor(Color(149, 184, 6));
+		g_VGuiSurface->DrawFilledRect((centerW * 2) - 192, centerH + 21, (centerW * 2) - 193 + 178, (centerH + 7) + 15);
+		DrawString(ui_font, (centerW * 2) - 140, centerH + 14, Color(255, 255, 255, 255), FONT_LEFT, ("Spectator List"));
+	}
+	*/
 }
 
 void misc::SlideWalk(CUserCmd* cmd)
@@ -477,8 +562,84 @@ void misc::aimbot_hitboxes()
     hit_chams::get().add_matrix(player, aim::get().last_target[aim::get().last_target_index].record.matrixes_data.main);
 }
 
+void misc::halo()
+{
+	if (!c_config::get()->b["halo"])
+		return;
 
+	static auto model_index = m_modelinfo()->GetModelIndex(crypt_str("sprites/physbeam.vmt"));
+	//static auto localplr = m_engine()->GetLocalPlayer();
+	if (g_ctx.globals.should_update_beam_index)
+		model_index = m_modelinfo()->GetModelIndex(crypt_str("sprites/physbeam.vmt"));
+	std::vector<BeamInfo_t> new_beams;
+	BeamInfo_t info;
 
+	info.m_nType = TE_BEAMRINGPOINT;
+	info.m_pszModelName = crypt_str("sprites/physbeam.vmt");
+	info.m_nModelIndex = model_index;
+	info.m_nHaloIndex = 1;
+	info.m_flHaloScale = 3.0f;
+	info.m_flLife = 0.05f;
+	info.m_flWidth = 3.5f;
+	info.m_flFadeLength = 0.0f;
+	info.m_flAmplitude = 1.f;
+	info.m_flRed = (float)c_config::get()->c["halo_c"][0];
+	info.m_flGreen = (float)c_config::get()->c["halo_c"][1];
+	info.m_flBlue = (float)c_config::get()->c["halo_c"][2];
+	info.m_flBrightness = (float)c_config::get()->c["halo_c"][3];
+	info.m_flSpeed = 0.0f;
+	info.m_nStartFrame = 0.0f;
+	info.m_flFrameRate = 0.0f;
+	info.m_nSegments = -1;
+	info.m_nFlags = FBEAM_FADEOUT;
+	info.m_vecCenter = g_ctx.local()->GetAbsOrigin() + Vector(0.0f, 0.0f, 70.0f);
+	info.m_flStartRadius = 35.0f;
+	info.m_flEndRadius = 30.0f;
+	info.m_bRenderable = true;
+
+	auto beam_draw = m_viewrenderbeams()->CreateBeamRingPoint(info);
+
+	if (beam_draw)
+		m_viewrenderbeams()->DrawBeam(beam_draw);
+}
+
+void misc::trail()
+{
+	if (!c_config::get()->b["trail"]) {
+		return;
+	}
+	static float rainbow;
+	rainbow += 0.001f;
+	if (rainbow > 1.f)
+		rainbow = 0.f;
+
+	auto rainbow_col = Color::FromHSB(rainbow, 1, 1);
+	auto local_pos = g_ctx.local()->m_vecOrigin();
+	BeamInfo_t beamInfo;
+	beamInfo.m_nType = 0; //TE_BEAMPOINTS
+	beamInfo.m_vecCenter = g_ctx.local()->GetAbsOrigin() + Vector(0.0f, 0.0f, -70.0f);
+	beamInfo.m_pszModelName = "sprites/glow01.vmt";
+	beamInfo.m_pszHaloName = "sprites/glow01.vmt";
+	beamInfo.m_flHaloScale = 3.0;
+	beamInfo.m_flWidth = 4.5f;
+	beamInfo.m_flEndWidth = 4.5f;
+	beamInfo.m_flFadeLength = 0.5f;
+	beamInfo.m_flAmplitude = 0;
+	beamInfo.m_flBrightness = 255.f;
+	beamInfo.m_flSpeed = 0.0f;
+	beamInfo.m_nStartFrame = 0.0;
+	beamInfo.m_flFrameRate = 0.0;
+	beamInfo.m_flRed = rainbow_col.r();
+	beamInfo.m_flGreen = rainbow_col.g();
+	beamInfo.m_flBlue = rainbow_col.b();
+	beamInfo.m_nSegments = -1;
+	beamInfo.m_bRenderable = true;
+	beamInfo.m_flLife = 1;
+	beamInfo.m_nFlags = FBEAM_FADEOUT; //FBEAM_ONLYNOISEONCE | FBEAM_NOTILE | FBEAM_HALOBEAM
+	Beam_t* myBeam = m_viewrenderbeams()->CreateBeamPoints(beamInfo);
+	if (myBeam)
+		m_viewrenderbeams()->DrawBeam(myBeam);
+}
 void misc::rank_reveal()
 {
 	if (!c_config::get()->b["misc_rev_comp"])

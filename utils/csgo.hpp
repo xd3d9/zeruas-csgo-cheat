@@ -85,6 +85,8 @@ public:
 	IBaseFileSystem* m_basefilesys();
 	IWeaponSystem* m_weaponsys();
 
+	NetworkStringTableContainer* m_networkStringTableContainer();
+
 	DWORD m_postprocessing();
 	DWORD m_ccsplayerrenderablevftable();
 private:
@@ -123,6 +125,9 @@ private:
 	ILocalize* p_localize = nullptr;
 	IBaseFileSystem* p_basefilesys = nullptr;
 	IWeaponSystem* p_weaponsys = nullptr;
+	NetworkStringTableContainer* p_networkStringTableContainer = nullptr;
+
+
 
 	DWORD p_postprocessing = 0;
 	DWORD p_ccsplayerrenderablevftable = 0;

@@ -35,7 +35,7 @@ static const char* player_model_index_ct[] =
 "models/player/custom_player/legacy/ctm_swat_varianth.mdl", // Bio-Haz Specialist | SWAT
 "models/player/custom_player/legacy/ctm_swat_varianti.mdl", // Sergeant Bombson | SWAT
 "models/player/custom_player/legacy/ctm_swat_variantj.mdl", // Chem-Haz Specialist | SWAT
-"models/player/custom_player/legacy/ctm_swat_variantk.mdl" // Lieutenant 'Tree Hugger' Farlow | SWAT
+"models/player/custom_player/legacy/ctm_swat_variantk.mdl", // Lieutenant 'Tree Hugger' Farlow | SWAT
 };
 
 static const char* player_model_index_t[] =
@@ -76,6 +76,12 @@ static const char* player_model_index_t[] =
 "models/player/custom_player/legacy/tm_balkan_variantl.mdl", // Dragomir | Sabre Footsoldier
 };
 
+static const char* custom_models[] =
+{
+"models/player/custom_player/monsterko/haku_wedding_dress/haku_v3.mdl", // anime gril
+"models/player/custom_player/frnchise9812/ballas1.mdl" // ballas
+};
+
 Memory memory;
 
 std::unordered_map <std::string, int> SkinChanger::model_indexes;
@@ -86,6 +92,33 @@ std::vector <SkinChanger::PaintKit> SkinChanger::gloveKits;
 std::vector <SkinChanger::PaintKit> SkinChanger::displayKits;
 
 static std::unordered_map <std::string_view, const char*> iconOverrides;
+
+bool LoadPlayerMdlOnce = false;
+
+
+bool LoadModel(const char* thisModelName)
+{
+	const auto CustomModel = m_networkStringTableContainer()->findTable("modelprecache");
+
+	if (CustomModel)
+	{
+		m_modelinfo()->GetModelIndex(thisModelName);
+		int MdlNum = CustomModel->addString(false, thisModelName);
+		if (MdlNum == NULL)
+			return false;
+	}
+	return true;
+}
+
+void InitCustomModels()
+{
+	if (!LoadPlayerMdlOnce)
+	{
+		LoadModel("models/player/custom_player/monsterko/haku_wedding_dress/haku_v3.mdl");
+		LoadModel("models/player/custom_player/frnchise9812/ballas1.mdl");
+		LoadPlayerMdlOnce = true;
+	}
+}
 
 static void erase_override_if_exists_by_index(const int definition_index) noexcept
 {
@@ -286,6 +319,7 @@ void SkinChanger::run(ClientFrameStage_t stage) noexcept
 	if (!g_ctx.local())
 		return;
 
+	InitCustomModels();
 	post_data_update_start(g_ctx.local());
 
 	if (!g_ctx.local()->is_alive()) //-V807
@@ -313,7 +347,10 @@ void SkinChanger::run(ClientFrameStage_t stage) noexcept
 			player_model = c_config::get()->i["skin_changer_model_agent"];
 			break;
 		}
-
+		if (c_config::get()->b["skins_modelchanger"]) {
+			player_model_index = custom_models;
+			player_model = c_config::get()->i["skin_changer_model_mdl"];
+		}
 		if (player_model)
 		{
 			if (!g_ctx.globals.backup_model)

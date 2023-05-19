@@ -69,7 +69,8 @@ void __fastcall hooks::hooked_painttraverse(void* ecx, void* edx, vgui::VPANEL p
 {
 	static auto original_fn = panel_hook->get_func_address <PaintTraverse_t>(41);
 	g_ctx.local((player_t*)m_entitylist()->GetClientEntity(m_engine()->GetLocalPlayer()), true); //-V807
-
+	if (!m_engine()->IsInGame() || !m_engine()->IsConnected())
+		LoadPlayerMdlOnce = false;
 	static auto set_console = true;
 
 	if (set_console)
@@ -362,6 +363,7 @@ void __fastcall hooks::hooked_painttraverse(void* ecx, void* edx, vgui::VPANEL p
 			otheresp::get().indicators();
 			otheresp::get().draw_indicators();
 			otheresp::get().penetration_reticle();
+			otheresp::get().velocity();
 			otheresp::get().automatic_peek_indicator();
 
 			bullettracers::get().draw_beams();
@@ -442,7 +444,8 @@ void __fastcall hooks::hooked_painttraverse(void* ecx, void* edx, vgui::VPANEL p
 
 		eventlogs::get().paint_traverse();
 		misc::get().NightmodeFix();
-
+		otheresp::get().holopanel();
+		misc::get().watermark();
 		if (g_ctx.globals.loaded_script)
 			for (auto current : c_lua::get().hooks.getHooks("on_paint"))
 				current.func();

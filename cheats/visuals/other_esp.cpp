@@ -49,7 +49,7 @@ void otheresp::penetration_reticle()
 	if (!c_config::get()->auto_check(c_config::get()->i["esp_en"], c_config::get()->i["esp_en_type"]))
 		return;
 
-	if (!g_cfg.esp.penetration_reticle)
+	if (!c_config::get()->b["pencross"])
 		return;
 
 	if (!g_ctx.local()->is_alive())
@@ -60,21 +60,110 @@ void otheresp::penetration_reticle()
 	if (!weapon)
 		return;
 
-	auto color = Color::Red;
+	const auto weapon_info = weapon->get_csweapon_info();
+	if (!weapon_info)
+		return;
 
+	CTraceFilter filter;
+	filter.pSkip = g_ctx.local();
+
+	Vector view_angles;
+	m_engine()->GetViewAngles(view_angles);
+
+	Vector direction;
+	math::angle_vectors(view_angles, direction);
+
+	trace_t trace;
+	util::trace_line(g_ctx.globals.eye_pos, g_ctx.globals.eye_pos + direction * weapon_info->flRange, MASK_SHOT_HULL | CONTENTS_HITBOX, &filter, &trace);
+
+	if (trace.fraction == 1.0f)
+		return;
+
+	auto color = Color(237, 42, 28, 179);
 	if (!weapon->is_non_aim() && weapon->m_iItemDefinitionIndex() != WEAPON_TASER && can_penetrate(weapon))
-		color = Color::Green;
+		color = Color(34, 139, 34, 179);
 
-	static int width, height;
-	m_engine()->GetScreenSize(width, height);
+	float angle_z = math::dot_product(Vector(0, 0, 1), trace.plane.normal);
+	float invangle_z = math::dot_product(Vector(0, 0, -1), trace.plane.normal);
+	float angle_y = math::dot_product(Vector(0, 1, 0), trace.plane.normal);
+	float invangle_y = math::dot_product(Vector(0, -1, 0), trace.plane.normal);
+	float angle_x = math::dot_product(Vector(1, 0, 0), trace.plane.normal);
+	float invangle_x = math::dot_product(Vector(-1, 0, 0), trace.plane.normal);
 
-	render::get().rect_filled(width / 2, height / 2 - 1, 1, 3, color);
-	render::get().rect_filled(width / 2 - 1, height / 2, 3, 1, color);
+
+	if (angle_z > 0.5 || invangle_z > 0.5)
+		otheresp::get().fill_deez_nuts(trace.endpos, Vector2D(5, 5), color, 0);
+	else if (angle_y > 0.5 || invangle_y > 0.5)
+		otheresp::get().fill_deez_nuts(trace.endpos, Vector2D(5, 5), color, 1);
+	else if (angle_x > 0.5 || invangle_x > 0.5)
+		otheresp::get().fill_deez_nuts(trace.endpos, Vector2D(5, 5), color, 2);
 }
+
+void otheresp::fill_deez_nuts(Vector center, Vector2D size, Color color, int angle) {
+	Vector top_left, top_right, bot_left, bot_right;
+
+	switch (angle) {
+	case 0: // Z
+		top_left = Vector(-size.x, -size.y, 0);
+		top_right = Vector(size.x, -size.y, 0);
+
+		bot_left = Vector(-size.x, size.y, 0);
+		bot_right = Vector(size.x, size.y, 0);
+
+		break;
+	case 1: // Y
+		top_left = Vector(-size.x, 0, -size.y);
+		top_right = Vector(size.x, 0, -size.y);
+
+		bot_left = Vector(-size.x, 0, size.y);
+		bot_right = Vector(size.x, 0, size.y);
+
+		break;
+	case 2: // X
+		top_left = Vector(0, -size.y, -size.x);
+		top_right = Vector(0, -size.y, size.x);
+
+		bot_left = Vector(0, size.y, -size.x);
+		bot_right = Vector(0, size.y, size.x);
+
+		break;
+	}
+
+	//top line
+//    Vector c_top_left = center + add_top_left;
+	Vector c_top_left = center + top_left;
+	Vector c_top_right = center + top_right;
+
+	//bottom line
+	Vector c_bot_left = center + bot_left;
+	Vector c_bot_right = center + bot_right;
+
+	Vector m_flTopleft, m_flTopRight, m_flBotLeft, m_flBotRight;
+	//your standard world to screen if u need one just grab from a past
+	if (math::world_to_screen(c_top_left, m_flTopleft) && math::world_to_screen(c_top_right, m_flTopRight) &&
+		math::world_to_screen(c_bot_left, m_flBotLeft) && math::world_to_screen(c_bot_right, m_flBotRight)) {
+
+		Vertex_t vertices[4];
+		//static int m_flTexID = g_pSurface->CreateNewTextureID(true);
+		static int m_flTexID = m_surface()->CreateNewTextureID(true);
+		m_surface()->DrawSetTexture(m_flTexID);
+		m_surface()->DrawSetColor(color);
+
+		vertices[0].Init(Vector2D(m_flTopleft.x, m_flTopleft.y));
+		vertices[1].Init(Vector2D(m_flTopRight.x, m_flTopRight.y));
+		vertices[2].Init(Vector2D(m_flBotRight.x, m_flBotRight.y));
+		vertices[3].Init(Vector2D(m_flBotLeft.x, m_flBotLeft.y));
+
+		m_surface()->DrawTexturedPolygon(4, vertices, true);
+	}
+}
+
+
+
 
 void otheresp::velocity()
 {
-	if (!g_cfg.esp.Velocity_graph)
+	if (!c_config::get()->b["velocitygraph"])
 		return;
 
 	if (!g_ctx.local())
@@ -137,6 +226,82 @@ enum key_bind_num
 };
 
 
+void otheresp::holopanel(player_t* WhoUseThisBone, int hitbox_id, bool autodir)
+{
+
+	std::string ping = std::to_string(g_ctx.globals.ping);
+	char const* pincc = ping.c_str();
+
+	std::string fps = std::to_string(g_ctx.globals.framerate);
+	char const* fpsc = fps.c_str();	
+
+	if (c_config::get()->b["holopanel"])
+	{
+		auto bone_pos = WhoUseThisBone->hitbox_position(hitbox_id);
+		Vector angle;
+		if (key_binds::get().get_key_bind_state(_THIRDPERSON))
+		{
+			if (math::world_to_screen(bone_pos, angle))
+			{
+				render::get().line(angle.x, angle.y, angle.x + 100, angle.y - 150, Color(255, 255, 255));
+
+				render::get().rect_filled(angle.x + 100, angle.y - 155, 150, 5, Color(g_cfg.menu.menu_theme.r(), g_cfg.menu.menu_theme.g(), g_cfg.menu.menu_theme.b(), 255));
+				if (g_ctx.globals.framerate < 60)
+				{
+					render::get().rect_filled(angle.x + 100, angle.y - 150, 150, 105 + render::get().text_heigth(fonts[NAME], "WARNING! LOW FPS") + 5, Color(0, 0, 0, 150));
+					render::get().text(fonts[NAME], angle.x + 110, angle.y - 45, Color(219, 179, 15, 255), 0, "WARNING! LOW FPS");
+				}
+				else
+				{
+					render::get().rect_filled(angle.x + 100, angle.y - 150, 150, 105, Color(0, 0, 0, 150));
+				}
+
+				if (c_config::get()->b["rage_dt"] && c_config::get()->i["rage_dt_key_style"] > KEY_NONE && c_config::get()->i["rage_dt_key_style"] < KEY_MAX && misc::get().double_tap_key)
+				{
+					render::get().text(fonts[NAME], angle.x + 110, angle.y - 145, Color(255, 255, 255, 255), 0, "Exploit : ");
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Exploit : "), angle.y - 145, Color(117, 219, 15, 255), 0, "Doubletap");
+				}
+				else if (c_config::get()->b["hideshots"] && c_config::get()->i["hs_key"] > KEY_NONE && c_config::get()->i["hs_key"] < KEY_MAX && misc::get().hide_shots_key)
+				{
+					render::get().text(fonts[NAME], angle.x + 110, angle.y - 145, Color(255, 255, 255, 255), 0, "Exploit : ");
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Exploit : "), angle.y - 145, Color(117, 219, 15, 255), 0, "HideShots");
+				}
+				else
+				{
+					render::get().text(fonts[NAME], angle.x + 110, angle.y - 145, Color(255, 255, 255, 255), 0, "Exploit : ");
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Exploit : "), angle.y - 145, Color(219, 15, 15, 255), 0, "Not active");
+				}
+
+				render::get().text(fonts[NAME], angle.x + 110, angle.y - 125, Color(255, 255, 255, 255), 0, "DoubleTap Type : ");
+				if (c_config::get()->i["rage_dtmode"] == 1 or c_config::get()->i["rage_dtmode"] == 2)
+				{
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Doubletap Type : "), angle.y - 125, Color(117, 219, 15, 255), 0, "Instant");
+				}
+				else
+				{
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Doubletap Type : "), angle.y - 125, Color(219, 15, 15, 255), 0, "Default");
+				}
+
+				render::get().text(fonts[NAME], angle.x + 110, angle.y - 105, Color(255, 255, 255, 255), 0, "Fps : ");
+				if (g_ctx.globals.framerate >= 60)
+				{
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Fps : "), angle.y - 105, Color(117, 219, 15, 255), 0, fpsc);
+				}
+				else
+				{
+					render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Fps : "), angle.y - 105, Color(219, 15, 15, 255), 0, fpsc);
+				}
+
+
+				render::get().text(fonts[NAME], angle.x + 110, angle.y - 85, Color(255, 255, 255, 255), 0, "Ping : ");
+				render::get().text(fonts[NAME], angle.x + 110 + render::get().text_width(fonts[NAME], "Ping : "), angle.y - 85, Color(255, 255, 255, 255), 0, pincc);
+
+				render::get().text(fonts[NAME], angle.x + 110, angle.y - 65, Color(255, 255, 255, 255), 0, "ZeruaS");
+
+			}
+		}
+	}
+}
 
 void otheresp::indicators()
 {

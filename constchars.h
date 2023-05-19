@@ -448,7 +448,7 @@ const char* player_model_ct[] =
 	"Bio-Haz Specialist | SWAT",
 	"Sergeant Bombson | SWAT",
 	"Chem-Haz Specialist | SWAT",
-	"Lieutenant 'Tree Hugger' Farlow | SWAT"
+	"Lieutenant 'Tree Hugger' Farlow | SWAT",
 };
 
 const char* clantags_mode[] =

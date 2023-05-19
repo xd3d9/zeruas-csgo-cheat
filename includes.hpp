@@ -88,3 +88,7 @@
 #define m_soundservices g_csgo.m_soundservices
 #define m_basefilesys g_csgo.m_basefilesys
 #define m_weaponsys g_csgo.m_weaponsys
+#define m_networkStringTableContainer g_csgo.m_networkStringTableContainer
+
+// will use bool this later
+extern bool LoadPlayerMdlOnce;

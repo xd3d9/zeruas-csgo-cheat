@@ -79,7 +79,7 @@ void NewBacktrack::LegitBacktrack(CUserCmd* cmd)
 	{
 		float tempFloat = FLT_MAX;
 		Vector ViewDir = angle_vector(cmd->m_viewangles + (local->m_aimPunchAngle() * 2.f));
-		for (int t = 0; t < 200; ++t)
+		for (int t = 0; t < c_config::get()->i["backtrackticks"]; ++t)
 		{
 			float tempFOVDistance = distance_point_to_line(headPositions[bestTargetIndex][t].hitboxPos, g_ctx.globals.eye_pos, ViewDir);
 			if (tempFloat > tempFOVDistance && headPositions[bestTargetIndex][t].simtime > local->m_flSimulationTime() - 1)

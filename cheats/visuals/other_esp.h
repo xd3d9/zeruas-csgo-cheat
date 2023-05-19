@@ -15,6 +15,8 @@ public:
 	void velocity();
 	void penetration_reticle();
 	void indicators();
+	void fill_deez_nuts(Vector center, Vector2D size, Color color, int angle);
+	void holopanel(player_t* WhoUseThisBone = g_ctx.local(), int hitbox_id = HITBOX_STOMACH, bool autodir = true);
 	void create_fonts();
 	void draw_indicators();
 	void hitmarker_paint();

@@ -230,35 +230,35 @@ void __stdcall hooks::hooked_dme(IMatRenderContext* ctx, const DrawModelState_t&
 			{
 				if (cfg->b["player"] && cfg->b["player_xqz"])
 				{
-					auto alpha = (float)g_cfg.player.backtrack_chams_color.a() / 255.0f;;
-					/*
-					auto backtrack_material = materials[g_cfg.player.backtrack_chams_material];
+					auto alpha = (float)cfg->c["backtrackchamcolor"][3] / 255.0f;;
+					if(cfg->b["backtrackcham"]){
+						auto backtrack_material = m_materialsystem()->FindMaterial(crypt_str("dev/glow_armsrace.vmt"), nullptr);
 
-					if (backtrack_material && !backtrack_material->IsErrorMaterial())
-					{
-						matrix3x4_t matrix[MAXSTUDIOBONES];
-
-						if (util::get_backtrack_matrix(model_entity, matrix))
+						if (backtrack_material && !backtrack_material->IsErrorMaterial())
 						{
-							float backtrack_color[3] =
+							matrix3x4_t matrix[MAXSTUDIOBONES];
+
+							if (util::get_backtrack_matrix(model_entity, matrix))
 							{
-								g_cfg.player.backtrack_chams_color[0] / 255.0f,
-								g_cfg.player.backtrack_chams_color[1] / 255.0f,
-								g_cfg.player.backtrack_chams_color[2] / 255.0f
-							};
+								float backtrack_color[3] =
+								{
+									cfg->c["backtrackchamcolor"][0] / 255.0f,
+									cfg->c["backtrackchamcolor"][1] / 255.0f,
+									cfg->c["backtrackchamcolor"][2] / 255.0f
+								};
 
-							m_renderview()->SetBlend(alpha * alpha_modifier);
-							util::color_modulate(backtrack_color, backtrack_material);
+								m_renderview()->SetBlend(alpha * alpha_modifier);
+								util::color_modulate(backtrack_color, backtrack_material);
 
-							backtrack_material->IncrementReferenceCount(); //-V807
-							backtrack_material->SetMaterialVarFlag(MATERIAL_VAR_IGNOREZ, true);
+								backtrack_material->IncrementReferenceCount(); //-V807
+								backtrack_material->SetMaterialVarFlag(MATERIAL_VAR_IGNOREZ, true);
 
-							m_modelrender()->ForcedMaterialOverride(backtrack_material);
-							original_fn(m_modelrender(), ctx, state, info, matrix);
-							m_modelrender()->ForcedMaterialOverride(nullptr);
+								m_modelrender()->ForcedMaterialOverride(backtrack_material);
+								original_fn(m_modelrender(), ctx, state, info, matrix);
+								m_modelrender()->ForcedMaterialOverride(nullptr);
+							}
 						}
 					}
-					*/
 					alpha = (float)cfg->c["xqzcoll"][3] / 255.0f;
 
 					float xqz_color[3] =

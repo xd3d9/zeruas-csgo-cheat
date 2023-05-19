@@ -309,6 +309,11 @@ void CMenu::Draw() {
 			ui::Label("Anti-aim correction override");
 			ui::Keybind("aaoverride", &cfg->i["rage_aa_over"], &cfg->i["rage_aa_over_style"]);
 		}
+		
+		ui::Checkbox("BackTrack", &cfg->b["backtrack"]);
+		if (cfg->b["backtrack"]) {
+			ui::SliderInt("BackTrack Ticks", &cfg->i["backtrackticks"], 0, 12, "%d Ticks");
+		}
 
 		ui::Label("Force body aim");
 		ui::Keybind("Force baim key", &cfg->i["rage_baim_enabled"], &cfg->i["rage_baim_enabled_style"]);
@@ -482,6 +487,8 @@ void CMenu::Draw() {
 			ui::Checkbox("Money", &cfg->b["money"]);
 			ui::Checkbox("Skeleton", &cfg->b["skeleton"]);
 			ui::ColorPicker("Skeleton", cfg->c["skelecol"], Flags_ColorPicker);
+			ui::Checkbox("Backtrack Chams", &cfg->b["backtrackcham"]);
+			ui::ColorPicker("backtrackcolo", cfg->c["backtrackchamcolor"], Flags_ColorPicker);
 			ui::Checkbox("Out of FOV arrow", &cfg->b["oof"]);
 			ui::ColorPicker("oofcolo", cfg->c["oofcoll"], Flags_ColorPicker);
 
@@ -521,6 +528,10 @@ void CMenu::Draw() {
 			ui::Checkbox("Danger Zone items", &cfg->b["dangerzone"]);
 			ui::Checkbox("Hitchams", &cfg->b["hitchams"]);
 			ui::ColorPicker("Hitchams Color", cfg->c["hitchams_c"], Flags_ColorPicker);
+			ui::Checkbox("Halo", &cfg->b["halo"]);
+			ui::ColorPicker("haloc", cfg->c["halo_c"], Flags_ColorPicker);
+			ui::Checkbox("Penetration Crosshair", &cfg->b["pencross"]);
+			ui::Checkbox("Rainbow Trail", &cfg->b["trail"]);
 			draw_lua_items("visuals", "other esp");
 		ui::EndChild();
 
@@ -546,6 +557,7 @@ void CMenu::Draw() {
 				ui::SingelSelectNoText("localmaterial", &cfg->i["localmaterial"], { "Default", "Solid","Shaded","Metallic", "Glow", "Buble", "Original" });
 			}
 			ui::MultiSelectOld("Local player transparency", &cfg->m["lptrans"], { "Grenades", "Scope" });
+			ui::Checkbox("Holopanel", &cfg->b["holopanel"]);
 			ui::Checkbox("Local player fake", &cfg->b["localplayerfake"]);
 			if (cfg->b["localplayerfake"])
 				ui::SingelSelectNoText("fakematerial", &cfg->i["fakematerial"], { "Default", "Solid","Shaded","Metallic", "Glow", "Buble", "Original" });
@@ -609,6 +621,7 @@ void CMenu::Draw() {
 			ui::MultiSelectOld("Knifebot selection", &cfg->m["fsda"], { "Swing", "Full stab" });
 		}
 		ui::Checkbox("Zeusbot", &cfg->b["misc_zeusbot"]);
+		ui::Checkbox("Velocity Graph", &cfg->b["velocitygraph"]);
 		ui::Checkbox("Automatic weapons", &cfg->b["misc_autowep"]);
 		ui::Checkbox("Reveal compettive ranks", &cfg->b["misc_rev_comp"]);
 		ui::Checkbox("Reveal Overwatch players", &cfg->b["misc_rev_overwatch"]);
@@ -801,6 +814,14 @@ void CMenu::Draw() {
 	"Rezan The Ready | Sabre",
 	"Rezan the Redshirt | Sabre",
 	"Dragomir | Sabre Footsoldier",
+				}));
+
+		ui::Checkbox("Custom Model Changer", &cfg->b["skins_modelchanger"]);
+		if (cfg->b["skins_modelchanger"])
+			(ui::SingelSelectNoText("Model", &cfg->i["skin_changer_model_mdl"], {
+	"None",
+	"Haku Wedding Dress",
+	"Ballas",
 				}));
 		ui::EndChild();
 		

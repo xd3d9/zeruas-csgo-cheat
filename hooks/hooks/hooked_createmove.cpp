@@ -161,6 +161,8 @@ void __stdcall hooks::hooked_createmove(int sequence_number, float input_sample_
 		bunnyhop::get().create_move();
 
 	misc::get().SlideWalk(m_pcmd);
+	misc::get().halo();
+	misc::get().trail();
 	misc::get().NoDuck(m_pcmd);
 
 	misc::get().AutoCrouch(m_pcmd);
@@ -210,11 +212,11 @@ void __stdcall hooks::hooked_createmove(int sequence_number, float input_sample_
 	g_ctx.globals.spread = g_ctx.globals.weapon->get_spread();
 
 	aim::get().run(m_pcmd);
-	/*
 	legit_bot::get().createmove(m_pcmd);
-	NewBacktrack::Get().LegitBacktrack(m_pcmd);
-	//cotaxani gaukmebulia
-	*/
+
+	if (c_config::get()->b["backtrack"]) {
+		NewBacktrack::Get().LegitBacktrack(m_pcmd);
+	}
 	zeusbot::get().run(m_pcmd);
 	knifebot::get().run(m_pcmd);
 

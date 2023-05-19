@@ -321,6 +321,8 @@ void worldesp::molotov_timer(entity_t* entity)
 	auto distance = g_ctx.local()->GetAbsOrigin().DistTo(weapon->GetAbsOrigin()) / 12.0f;
 
 	render::get().text(fonts[HE], screen_origin.x, screen_origin.y - size.y * 0.5f + 8.0f, Color(255, 255, 255), HFONT_CENTERED_X, "%i", (int)distance);
+
+	render::get().Draw3DCircle(origin, Vector(maxs - mins).Length2D() * 0.5, Color(200, 30, 30));
 }
 
 void worldesp::smoke_timer(entity_t* entity)

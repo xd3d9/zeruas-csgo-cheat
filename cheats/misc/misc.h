@@ -74,7 +74,8 @@ public:
 	void desync_arrows();
 	void aimbot_hitboxes();
 	void ragdolls();
-
+	void halo();
+	void trail();
 	void rank_reveal();
 
 

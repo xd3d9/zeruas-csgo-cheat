@@ -22,3 +22,31 @@ public:
     virtual void*            GetDataTableBasePtr() = 0;
     virtual void             SetDestroyedOnRecreateEntities(void) = 0;
 };
+
+// classes, definitions
+#include <cstddef>
+
+namespace VirtualMethod
+{
+    template <typename T, std::size_t Idx, typename ...Args>
+    constexpr auto call(void* classBase, Args... args) noexcept
+    {
+        return ((*reinterpret_cast<T(__thiscall***)(void*, Args...)>(classBase))[Idx])(classBase, args...);
+    }
+}
+
+#define VIRTUAL_METHOD(returnType, name, idx, args, argsRaw) \
+constexpr auto name args noexcept \
+{ \
+    return VirtualMethod::call<returnType, idx>argsRaw; \
+}
+
+class NetworkStringTable {
+public:
+    VIRTUAL_METHOD(int, addString, 8, (bool isServer, const char* value, int length = -1, const void* userdata = nullptr), (this, isServer, value, length, userdata))
+};
+
+class NetworkStringTableContainer {
+public:
+    VIRTUAL_METHOD(NetworkStringTable*, findTable, 3, (const char* name), (this, name))
+};

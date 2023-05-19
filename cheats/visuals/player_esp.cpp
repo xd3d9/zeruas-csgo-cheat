@@ -37,6 +37,8 @@ public:
 	RadarPlayer_t radar_info[65];
 };
 
+
+
 void playeresp::paint_traverse()
 {
 	static auto alpha = 1.0f;

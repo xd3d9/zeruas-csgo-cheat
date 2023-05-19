@@ -90,7 +90,8 @@ void eventlogs::events(IGameEvent* event)
 
 		if (attacker_id == m_engine()->GetLocalPlayer() && userid_id != m_engine()->GetLocalPlayer())
 		{
-			ss << crypt_str("Hit ") << userid_info.szName << crypt_str(" in the ") << get_hitgroup_name(event->GetInt(crypt_str("hitgroup"))) << crypt_str(" for ") << event->GetInt(crypt_str("dmg_health"));
+			auto current_shot = g_ctx.shots.end();
+			ss << crypt_str("Hit ") << userid_info.szName << crypt_str(" in the ") << get_hitgroup_name(event->GetInt(crypt_str("hitgroup"))) << crypt_str(" bt: [") << static_cast<int>TICKS_TO_TIME(current_shot->shot_info.backtrack_ticks) << crypt_str("] ht [") << current_shot->shot_info.hitchance << crypt_str("] for ") << event->GetInt(crypt_str("dmg_health"));
 			ss << crypt_str(" (") << event->GetInt(crypt_str("health")) << crypt_str(" health remaining)");
 
 			add(ss.str());

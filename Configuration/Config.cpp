@@ -449,6 +449,7 @@ void c_config::load_defaults() {
 	c["menucolor"][3] = 255;
 	
 	i["rage_key_enabled_st"] = 1;
+	i["backtrackticks"] = 0;
 
 	c["grentrajcoll"][0] = 255;
 	c["grentrajcoll"][1] = 50;
@@ -492,6 +493,7 @@ void c_config::load_defaults() {
 	c["vis_glow_color"][2] = 170 / 255.f;
 	c["vis_glow_color"][3] = 0.5f;
 
+
 	c["vis_glowself_color"][0] = 1.f;
 	c["vis_glowself_color"][1] = 1.f;
 	c["vis_glowself_color"][2] = 1.f;
@@ -514,6 +516,8 @@ void c_config::load_defaults() {
 	setcolor(c["oofcoll"], 253, 253, 253, 255);
 	setcolor(c["playercoll"], 158, 203, 74, 255);
 	setcolor(c["hitchams_c"], 255, 255, 255, 255);
+	setcolor(c["backtrackchamcolor"], 255, 255, 255, 255);
+	setcolor(c["halo_c"], 255, 255, 255, 255);
 	setcolor(c["adjcol"], 61, 57, 62, 255);
 	setcolor(c["bullcoll"], 175, 101, 188, 255);
 	setcolor(c["xqzcoll"], 74, 130, 185, 255);

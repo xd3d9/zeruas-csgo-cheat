@@ -491,6 +491,10 @@ struct inferno_t : public entity_t
 {
     OFFSET(float, get_spawn_time, 0x20);
 
+    NETVAR(int, m_nFireEffectTickBegin, crypt_str("DT_Inferno"), crypt_str("m_nFireEffectTickBegin"));
+
+    NETVAR(int, m_fireCount, crypt_str("DT_Inferno"), crypt_str("m_fireCount"));
+
     static float get_expiry_time()
     {
         return 7.03125f;
